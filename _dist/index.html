@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rumah Impian — Temukan Hunian Sempurna Anda</title>
+<meta name="description" content="Rumah Impian — agen properti terpercaya untuk membeli, menjual, dan menemukan hunian impian Anda di Yogyakarta dan sekitarnya.">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          mint:   '#EDF4E2',
+          brand:  '#CDF187',
+          forest: '#0F483F',
+          ink:    '#1A2B3C',
+          wa:     '#25D366',
+        },
+        fontFamily: { sans: ['Poppins', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
+      },
+    },
+  };
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<!-- Josefin Sans — khusus nama merek "Rumah Impian" di navbar -->
+<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital@0;1&display=swap" rel="stylesheet">
+
+<style>
+  /* ══════════════════════════════════════════════════════════
+     DASAR — halaman mengisi seluruh lebar layar
+     overflow-x: clip (bukan hidden) supaya animasi geser
+     horizontal tidak memicu scroll samping, TANPA merusak
+     position:sticky pada navbar (hidden akan merusaknya).
+     ══════════════════════════════════════════════════════════ */
+  html, body { width: 100%; max-width: 100%; overflow-x: clip; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: #FFFFFF; }
+  .wrap { width: 100%; max-width: 1720px; margin-inline: auto; }
+
+  h1, h2, h3 { letter-spacing: -0.02em; }
+
+  /* Nama merek — memakai Josefin Sans */
+  .brand { font-family: 'Josefin Sans', ui-sans-serif, system-ui, sans-serif; letter-spacing: .01em; }
+
+  /* Ikon garis */
+  .ic   { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .ic-2 { fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+  .sel  { appearance: none; -webkit-appearance: none; }
+
+  /* Sorotan kata berwarna (gaya referensi) */
+  .hl { color: #7CB342; }
+
+  /* ══════════════════════════════════════════════════════════
+     1. PEMBUKA (preloader) — kesan pertama saat masuk
+     ══════════════════════════════════════════════════════════ */
+  #intro {
+    position: fixed; inset: 0; z-index: 90;
+    background: #0F483F;
+    display: grid; place-items: center;
+    transition: opacity .6s ease, visibility .6s ease;
+  }
+  #intro.done { opacity: 0; visibility: hidden; }
+  #intro .mark { animation: pop .7s cubic-bezier(.22,1,.36,1) both; }
+  #intro .txt {
+    margin-top: 16px; color: #fff; font-weight: 600; letter-spacing: .3px;
+    animation: rise .7s .12s cubic-bezier(.22,1,.36,1) both;
+  }
+  #intro .bar { margin-top: 18px; width: 148px; height: 3px; border-radius: 9px; background: rgba(255,255,255,.18); overflow: hidden; }
+  #intro .bar i { display: block; height: 100%; width: 0; background: #CDF187; border-radius: 9px;
+                  animation: load .95s ease forwards; }
+  @keyframes pop  { from { transform: scale(.6); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes rise { from { transform: translateY(12px); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes load { to { width: 100%; } }
+
+  /* ══════════════════════════════════════════════════════════
+     2. MUNCUL SAAT SCROLL (reveal)
+     Penting: hanya aktif kalau JS jalan (html.js), supaya konten
+     tetap terlihat bila JS gagal dimuat.
+     ══════════════════════════════════════════════════════════ */
+  html.js .reveal {
+    opacity: 0; transform: translateY(28px);
+    transition: opacity .7s cubic-bezier(.22,1,.36,1), transform .7s cubic-bezier(.22,1,.36,1);
+    will-change: opacity, transform;
+  }
+  html.js .reveal.in { opacity: 1; transform: none; }
+
+  html.js .reveal-l { opacity: 0; transform: translateX(-34px); transition: opacity .75s cubic-bezier(.22,1,.36,1), transform .75s cubic-bezier(.22,1,.36,1); }
+  html.js .reveal-r { opacity: 0; transform: translateX(34px);  transition: opacity .75s cubic-bezier(.22,1,.36,1), transform .75s cubic-bezier(.22,1,.36,1); }
+  html.js .reveal-l.in, html.js .reveal-r.in { opacity: 1; transform: none; }
+
+  html.js .reveal-s { opacity: 0; transform: scale(.94); transition: opacity .7s cubic-bezier(.22,1,.36,1), transform .7s cubic-bezier(.22,1,.36,1); }
+  html.js .reveal-s.in { opacity: 1; transform: none; }
+
+  /* Tunda berurutan (stagger) */
+  .d1 { transition-delay: .07s !important; }
+  .d2 { transition-delay: .14s !important; }
+  .d3 { transition-delay: .21s !important; }
+  .d4 { transition-delay: .28s !important; }
+  .d5 { transition-delay: .35s !important; }
+  .d6 { transition-delay: .42s !important; }
+
+  /* ══════════════════════════════════════════════════════════
+     3. NAVBAR
+     ══════════════════════════════════════════════════════════ */
+  #nav { transition: box-shadow .3s, padding .3s, background .3s; }
+  #nav.stuck { box-shadow: 0 8px 30px -18px rgba(15,72,63,.35); background: rgba(255,255,255,.92); backdrop-filter: blur(10px); }
+
+  /* ══════════════════════════════════════════════════════════
+     4. HERO SLIDESHOW
+     ══════════════════════════════════════════════════════════ */
+  .slide { position: absolute; inset: 0; opacity: 0; transition: opacity 1.1s ease, transform 6s linear; }
+  .slide.on { opacity: 1; transform: scale(1.06); }
+
+  /* Foto hero tampil UTUH (tidak terpotong) — ruang di sisi diberi latar lembut */
+  #slides { background: #EEF2EA; }
+  #slides .slide { object-fit: contain; }
+
+  .dot { transition: all .3s; }
+  .dot.on { width: 26px; background: #CDF187; }
+
+  /* Titik navigasi diberi alas gelap lembut agar tetap terbaca di atas foto apa pun */
+  #dots {
+    padding: 6px 12px; border-radius: 999px;
+    background: rgba(15,72,63,.42); backdrop-filter: blur(6px);
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     5. KARTU
+     ══════════════════════════════════════════════════════════ */
+  .scard { transition: border-color .25s, box-shadow .25s, transform .25s; }
+  .scard:hover { border-color: #CDF187; box-shadow: 0 18px 40px -26px rgba(15,72,63,.5); transform: translateY(-4px); }
+
+  .pcard img { transition: transform .7s cubic-bezier(.22,1,.36,1); }
+  .pcard:hover img { transform: scale(1.06); }
+  .pcard { transition: transform .35s cubic-bezier(.22,1,.36,1); }
+  .pcard:hover { transform: translateY(-6px); }
+
+  /* Kartu baru masuk dengan halus */
+  @keyframes cardIn { from { opacity: 0; transform: translateY(26px) scale(.97); } to { opacity: 1; transform: none; } }
+  .card-new { animation: cardIn .6s cubic-bezier(.22,1,.36,1) both; }
+
+  /* ══════════════════════════════════════════════════════════
+     5b. GRID LAYANAN — satu wadah ber-border, dipisah garis tipis
+     (gaya referensi: ikon polos, judul huruf besar, rata kiri)
+     ══════════════════════════════════════════════════════════ */
+  .sgrid { display: grid; }
+  .sgrid > article { border-top: 1px solid #E6EAE3; }
+  .sgrid > article:first-child { border-top: 0; }
+
+  @media (min-width: 640px) {
+    .sgrid { grid-template-columns: repeat(2, 1fr); }
+    .sgrid > article { border-top: 0; border-left: 1px solid #E6EAE3; }
+    .sgrid > article:nth-child(odd) { border-left: 0; }
+    .sgrid > article:nth-child(n+3) { border-top: 1px solid #E6EAE3; }
+  }
+  @media (min-width: 1024px) {
+    .sgrid { grid-template-columns: repeat(4, 1fr); }
+    .sgrid > article { border-top: 0 !important; border-left: 1px solid #E6EAE3; }
+    .sgrid > article:first-child { border-left: 0; }
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     6. FAQ
+     ══════════════════════════════════════════════════════════ */
+  .faq-a { max-height: 0; overflow: hidden; transition: max-height .45s cubic-bezier(.22,1,.36,1), padding .3s; }
+  .faq-item.open .faq-a { max-height: 340px; }
+  .faq-item .pm { transition: transform .35s cubic-bezier(.22,1,.36,1), background .3s, color .3s; }
+  .faq-item.open .pm { transform: rotate(45deg); background: #0F483F; color: #CDF187; }
+
+  /* ══════════════════════════════════════════════════════════
+     7. TOMBOL MENGAPUNG
+     ══════════════════════════════════════════════════════════ */
+  .fab { transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s; }
+  .fab:hover { transform: scale(1.08); }
+  .fab:active { transform: scale(.95); }
+  @keyframes pulseRing { 0% { transform: scale(.9); opacity: .55; } 70% { transform: scale(1.5); opacity: 0; } 100% { opacity: 0; } }
+  .ring { animation: pulseRing 2.4s ease-out infinite; }
+
+  #toTop { transition: opacity .35s, transform .35s; }
+  #toTop.hide { opacity: 0; transform: translateY(14px); pointer-events: none; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 10px; }
+  ::-webkit-scrollbar-thumb { background: #D5DEC6; border-radius: 8px; }
+  ::-webkit-scrollbar-thumb:hover { background: #BFCDA9; }
+
+  /* Hormati pengguna yang tidak ingin animasi */
+  @media (prefers-reduced-motion: reduce) {
+    html.js .reveal, html.js .reveal-l, html.js .reveal-r, html.js .reveal-s { opacity: 1 !important; transform: none !important; }
+    .slide { transition: opacity .3s; }
+    #intro { display: none; }
+  }
+</style>
+</head>
+
+<body class="font-sans antialiased text-ink">
+
+<!-- ═══════════════ PEMBUKA ═══════════════ -->
+<div id="intro">
+  <div class="text-center">
+    <img src="assets/rumah_impian_logo_vector.svg" alt=""
+         class="mark mx-auto h-[64px] w-auto" width="70" height="64">
+    <p class="txt brand text-[22px]">Rumah Impian</p>
+    <div class="bar"><i></i></div>
+  </div>
+</div>
+
+<!-- ═══════════════ NAVBAR ═══════════════ -->
+<header id="nav" class="w-full bg-white border-b border-slate-100 sticky top-0 z-40">
+  <div class="wrap flex items-center justify-between gap-4 px-5 sm:px-8 lg:px-10 py-4">
+
+    <a href="#" class="flex items-center gap-2 shrink-0">
+      <img src="assets/rumah_impian_logo_vector.svg" alt="Logo Rumah Impian"
+           class="h-[26px] w-auto -translate-y-[1px]" width="26" height="24">
+      <span class="brand text-[20px] font-semibold">Rumah Impian</span>
+    </a>
+
+    <nav class="hidden lg:flex items-center gap-9 text-[14px] font-normal text-slate-500">
+      <a href="#hero" class="text-ink font-medium">Home</a>
+      <a href="#property" class="hover:text-ink transition-colors">Property</a>
+      <a href="#services" class="hover:text-ink transition-colors">Layanan</a>
+      <a href="#about" class="hover:text-ink transition-colors">Tentang</a>
+      <a href="#contact" class="hover:text-ink transition-colors">Kontak</a>
+    </nav>
+
+    <div class="flex items-center gap-3 shrink-0">
+      <a id="nav-wa" href="#" target="_blank" rel="noopener"
+         class="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-wa text-white
+                text-[13.5px] font-semibold hover:brightness-95 transition shadow-[0_8px_20px_-10px_rgba(37,211,102,.9)]">
+        <svg viewBox="0 0 24 24" class="w-4 h-4" fill="currentColor">
+          <path d="M12.04 2C6.6 2 2.2 6.4 2.2 11.84c0 1.74.46 3.44 1.32 4.94L2 22l5.36-1.4c1.44.78 3.06 1.2 4.68 1.2 5.44 0 9.84-4.4 9.84-9.84S17.48 2 12.04 2zm5.7 13.9c-.24.68-1.4 1.3-1.94 1.36-.54.06-1.02.24-3.42-.72-2.9-1.16-4.72-4.16-4.86-4.36-.14-.2-1.14-1.54-1.14-2.94 0-1.4.72-2.08.98-2.36.26-.28.56-.36.76-.36l.54.02c.18 0 .42-.06.64.5.24.6.8 2.02.86 2.16.06.14.1.3.02.48-.1.2-.36.52-.56.72-.16.16-.34.34-.14.68.2.34.9 1.48 1.92 2.4 1.32 1.18 2.42 1.54 2.76 1.72.34.18.54.16.74-.08.2-.24.86-1 1.1-1.34.24-.34.46-.28.78-.16.32.12 2.02.96 2.36 1.14.34.18.58.26.66.4.08.16.08.9-.16 1.58z"/>
+        </svg>
+        Pesan via WhatsApp
+      </a>
+      <a href="#contact" class="hidden sm:block text-[14px] font-medium text-slate-600 hover:text-ink transition-colors">Konsultasi</a>
+
+      <button id="burger" class="lg:hidden grid place-items-center w-10 h-10 rounded-xl border border-slate-200"
+              aria-label="Buka menu" aria-expanded="false">
+        <svg viewBox="0 0 24 24" class="w-5 h-5 ic"><path d="M3.5 7h17M3.5 12h17M3.5 17h17"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- menu mobile -->
+  <div id="mmenu" class="lg:hidden overflow-hidden bg-white border-t border-slate-100"
+       style="max-height:0; transition:max-height .4s cubic-bezier(.22,1,.36,1)">
+    <nav class="wrap px-5 py-4 flex flex-col gap-1 text-[14px]">
+      <a href="#hero" class="px-3 py-3 rounded-xl hover:bg-mint transition">Home</a>
+      <a href="#property" class="px-3 py-3 rounded-xl hover:bg-mint transition">Property</a>
+      <a href="#services" class="px-3 py-3 rounded-xl hover:bg-mint transition">Layanan</a>
+      <a href="#about" class="px-3 py-3 rounded-xl hover:bg-mint transition">Tentang</a>
+      <a href="#contact" class="px-3 py-3 rounded-xl hover:bg-mint transition">Kontak</a>
+      <a id="mmenu-wa" href="#" target="_blank" rel="noopener"
+         class="mt-1 px-3 py-3 rounded-xl bg-wa text-white font-semibold text-center">Pesan via WhatsApp</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ═══════════════ HERO — SLIDESHOW 5 FOTO ═══════════════ -->
+<section id="hero" class="w-full bg-white">
+  <div class="wrap px-5 sm:px-8 lg:px-10 pt-10 lg:pt-14 pb-14">
+    <div class="grid lg:grid-cols-[1fr_1.18fr] gap-10 lg:gap-12 items-center">
+
+      <!-- Kiri -->
+      <div class="max-w-[620px]">
+        <span class="reveal inline-block px-4 py-1.5 rounded-full border border-slate-300
+                     text-[11px] font-medium text-slate-600">Agen Properti Terpercaya</span>
+
+        <h1 class="reveal d1 mt-5 text-[38px] sm:text-[42px] lg:text-[46px] font-bold leading-[1.14]">
+          Temukan Hunian Sempurna<br>
+          Untuk Hidup Yang Lebih<br>
+          <span class="inline-block pl-6 sm:pl-10">Nyaman &amp; Bermakna.</span>
+        </h1>
+
+        <p class="reveal d2 mt-6 text-[14.5px] leading-relaxed text-slate-400 max-w-[430px] font-light">
+          Temukan rumah impian Anda bersama kami. Dari rumah pertama hingga investasi properti —
+          kami dampingi setiap langkah, dari survei lokasi sampai akad.
+        </p>
+
+        <div class="reveal d3 mt-9 flex items-center gap-7">
+          <a href="#property"
+             class="px-7 py-3.5 rounded-full bg-white border border-slate-200 text-ink text-[14px] font-semibold
+                    shadow-[0_8px_22px_-14px_rgba(26,43,60,.4)] hover:border-slate-300 transition">
+            Lihat Properti
+          </a>
+          <a href="#about" class="text-[14px] font-semibold text-ink hover:opacity-70 transition">Tentang Kami</a>
+        </div>
+
+        <div class="reveal d4 mt-10 flex items-start gap-4">
+          <div class="flex -space-x-3 shrink-0">
+            <img class="w-10 h-10 rounded-full ring-2 ring-white object-cover" src="assets/img/av-1.jpg" alt="">
+            <img class="w-10 h-10 rounded-full ring-2 ring-white object-cover" src="assets/img/av-2.jpg" alt="">
+            <img class="w-10 h-10 rounded-full ring-2 ring-white object-cover" src="assets/img/av-3.jpg" alt="">
+            <span class="grid place-items-center w-10 h-10 rounded-full bg-brand ring-2 ring-white
+                         text-[11px] font-bold text-forest">18K+</span>
+          </div>
+          <p class="text-[12px] leading-relaxed text-slate-500 pt-0.5 font-light">
+            <b class="font-semibold text-ink">18K+ klien</b> mempercayai kami menemukan hunian impian mereka.
+            <a href="#contact" class="font-semibold text-ink underline underline-offset-2">Konsultasi Gratis</a>
+          </p>
+        </div>
+      </div>
+
+      <!-- Kanan: slideshow -->
+      <div class="reveal-r relative">
+        <div id="slides" class="relative rounded-3xl overflow-hidden aspect-[16/10] bg-slate-100
+                                shadow-[0_28px_70px_-40px_rgba(15,72,63,.5)]">
+          <img class="slide on" src="assets/img/hero-1.jpg" alt="Rumah modern dengan kolam renang">
+          <img class="slide"    src="assets/img/hero-2.jpg" alt="Vila putih kontemporer">
+          <img class="slide"    src="assets/img/hero-3.jpg" alt="Rumah kayu modern saat senja">
+          <img class="slide"    src="assets/img/hero-4.jpg" alt="Vila mewah berlantai banyak">
+          <img class="slide"    src="assets/img/hero-5.jpg" alt="Rumah modern dengan taman depan">
+
+          <!-- lapisan gelap lembut agar teks terbaca -->
+          <div class="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black/45 to-transparent pointer-events-none"></div>
+
+          <!-- kartu kaca -->
+          <div class="absolute bottom-5 right-5 w-[196px] rounded-2xl p-4
+                      bg-white/80 backdrop-blur-md border border-white/70
+                      shadow-[0_14px_34px_-16px_rgba(26,43,60,.5)]">
+            <div class="flex items-start justify-between">
+              <span class="text-[32px] font-bold leading-none">50+</span>
+              <svg viewBox="0 0 24 24" class="w-4 h-4 text-ink/60 ic-2"><path d="M7 17 17 7M9 7h8v8"/></svg>
+            </div>
+            <p class="mt-2 text-[11.5px] leading-snug text-slate-500 font-light">
+              Lebih dari 50 properti siap Anda pilih
+            </p>
+          </div>
+
+          <!-- panah -->
+          <button id="prev" aria-label="Foto sebelumnya"
+                  class="absolute left-4 top-1/2 -translate-y-1/2 grid place-items-center w-10 h-10 rounded-full
+                         bg-white/85 backdrop-blur text-ink hover:bg-white transition shadow-lg">
+            <svg viewBox="0 0 24 24" class="w-5 h-5 ic"><path d="m14 6-6 6 6 6"/></svg>
+          </button>
+          <button id="next" aria-label="Foto berikutnya"
+                  class="absolute right-4 top-1/2 -translate-y-1/2 grid place-items-center w-10 h-10 rounded-full
+                         bg-white/85 backdrop-blur text-ink hover:bg-white transition shadow-lg">
+            <svg viewBox="0 0 24 24" class="w-5 h-5 ic"><path d="m10 6 6 6-6 6"/></svg>
+          </button>
+
+          <!-- titik -->
+          <div id="dots" class="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ LAYANAN (gaya referensi) ═══════════════ -->
+<section id="services" class="w-full bg-mint/40">
+  <div class="wrap px-5 sm:px-8 lg:px-10 py-16 lg:py-24">
+
+    <div class="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+
+      <!-- Kiri: teks -->
+      <div class="max-w-[560px]">
+        <h2 class="reveal-l d1 mt-4 text-[28px] sm:text-[34px] lg:text-[38px] font-bold leading-[1.18]">
+          Mitra Terpercaya Untuk<br>
+          <span class="hl">Solusi Properti</span> Anda
+        </h2>
+
+        <p class="reveal-l d2 mt-5 text-[14px] leading-relaxed text-slate-500 font-light max-w-[460px]">
+          Kami berkomitmen memberikan layanan properti yang cepat, jujur, dan dapat diandalkan —
+          untuk rumah tinggal maupun investasi. Dengan pengalaman bertahun-tahun dalam jual-beli,
+          sewa, dan pendampingan KPR.
+        </p>
+
+        <a href="#property" class="reveal-l d3 inline-block mt-7 px-8 py-3.5 rounded-full bg-forest text-white
+                                   text-[13.5px] font-semibold hover:bg-forest/90 transition
+                                   shadow-[0_12px_28px_-14px_rgba(15,72,63,.9)]">Selengkapnya</a>
+
+        <div class="reveal-l d4 mt-10 flex items-center gap-4">
+          <div class="flex -space-x-3 shrink-0">
+            <img class="w-11 h-11 rounded-full ring-2 ring-white object-cover" src="assets/img/av-2.jpg" alt="">
+            <img class="w-11 h-11 rounded-full ring-2 ring-white object-cover" src="assets/img/av-1.jpg" alt="">
+            <img class="w-11 h-11 rounded-full ring-2 ring-white object-cover" src="assets/img/av-3.jpg" alt="">
+          </div>
+          <p class="text-[12.5px] leading-snug text-slate-500 font-light">
+            <b class="font-bold text-ink text-[15px]">18K+</b> klien telah mempercayai<br>layanan properti kami
+          </p>
+        </div>
+      </div>
+
+      <!-- Kanan: kolase 2 foto + kartu statistik -->
+      <div class="reveal-r relative grid grid-cols-[0.78fr_1fr] gap-4 items-end">
+
+        <div class="rounded-2xl overflow-hidden aspect-[4/5] bg-slate-100">
+          <img src="assets/img/about-tall.jpg" alt="Rumah modern dengan taman" class="w-full h-full object-cover">
+        </div>
+
+        <div class="rounded-2xl overflow-hidden aspect-[3/2] bg-slate-100">
+          <img src="assets/img/about-wide.jpg" alt="Tim agen properti kami" class="w-full h-full object-cover">
+        </div>
+
+        <!-- kartu statistik putih -->
+        <div class="absolute -bottom-7 left-1/2 -translate-x-1/2 w-[min(420px,92%)]
+                    bg-white rounded-2xl shadow-[0_20px_50px_-24px_rgba(15,72,63,.55)]
+                    grid grid-cols-2 divide-x divide-slate-100">
+          <div class="px-5 py-5 text-center">
+            <p class="text-[26px] font-bold leading-none" data-count="250" data-suffix="+">0</p>
+            <p class="mt-1.5 text-[11px] leading-snug text-slate-400 font-light">Properti Terjual</p>
+          </div>
+          <div class="px-5 py-5 text-center">
+            <p class="text-[26px] font-bold leading-none" data-count="98" data-suffix="%">0</p>
+            <p class="mt-1.5 text-[11px] leading-snug text-slate-400 font-light">Kepuasan Klien</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 kartu layanan — gaya referensi: satu wadah, ikon polos, judul huruf besar -->
+    <div class="mt-24">
+      <div class="sgrid rounded-2xl border border-slate-200 bg-white overflow-hidden">
+
+        <article class="reveal-s p-7 lg:p-8">
+          <svg viewBox="0 0 32 32" class="w-9 h-9 text-ink ic" style="stroke-width:1.4">
+            <rect x="4" y="4.5" width="24" height="23" rx="2.4"/>
+            <path d="M16 4.5v23M4 16h24"/>
+            <path d="M24.5 22.5h6.5M26 20l2.5 2.5L26 25"/>
+          </svg>
+          <h3 class="mt-8 text-[14px] font-bold uppercase tracking-[.06em] leading-[1.45]">
+            Konsultasi<br>Kebutuhan
+          </h3>
+          <p class="mt-3 text-[12.5px] leading-relaxed text-slate-400 font-light">
+            Kami mulai dengan mendengarkan: anggaran, lokasi, jumlah kamar, dan rencana jangka
+            panjang keluarga Anda.
+          </p>
+        </article>
+
+        <article class="reveal-s d1 p-7 lg:p-8">
+          <svg viewBox="0 0 32 32" class="w-9 h-9 text-ink ic" style="stroke-width:1.4">
+            <rect x="3.5" y="7" width="18" height="18" rx="2.2"/>
+            <path d="M21.5 12h4.2a2.3 2.3 0 0 1 2.3 2.3v6.4a2.3 2.3 0 0 1-2.3 2.3H21.5"/>
+            <circle cx="12.5" cy="16" r="3"/>
+            <path d="M6 7V4.8M13 7V4.8M20 7V4.8"/>
+          </svg>
+          <h3 class="mt-8 text-[14px] font-bold uppercase tracking-[.06em] leading-[1.45]">
+            Kurasi<br>Pilihan
+          </h3>
+          <p class="mt-3 text-[12.5px] leading-relaxed text-slate-400 font-light">
+            Dari ratusan listing, kami saring hanya yang benar-benar sesuai kriteria Anda — bukan
+            sebanyak mungkin.
+          </p>
+        </article>
+
+        <article class="reveal-s d2 p-7 lg:p-8">
+          <svg viewBox="0 0 32 32" class="w-9 h-9 text-ink ic" style="stroke-width:1.4">
+            <rect x="6" y="3.5" width="20" height="25" rx="2.2"/>
+            <circle cx="21.4" cy="16" r="1.5"/>
+            <path d="M6 9h20"/>
+          </svg>
+          <h3 class="mt-8 text-[14px] font-bold uppercase tracking-[.06em] leading-[1.45]">
+            Survei<br>Lokasi
+          </h3>
+          <p class="mt-3 text-[12.5px] leading-relaxed text-slate-400 font-light">
+            Kami dampingi Anda meninjau langsung kondisi bangunan, lingkungan, akses jalan, dan
+            potensi kawasan.
+          </p>
+        </article>
+
+        <article class="reveal-s d3 p-7 lg:p-8">
+          <svg viewBox="0 0 32 32" class="w-9 h-9 text-ink ic" style="stroke-width:1.4">
+            <path d="M7.5 3.5h13.6L26 8.4V28a1.5 1.5 0 0 1-1.5 1.5h-17A1.5 1.5 0 0 1 6 28V5a1.5 1.5 0 0 1 1.5-1.5z"/>
+            <path d="M20.5 3.5v5.4H26"/>
+            <path d="M11 15h10M11 19.5h10M11 24h6"/>
+          </svg>
+          <h3 class="mt-8 text-[14px] font-bold uppercase tracking-[.06em] leading-[1.45]">
+            Berkas &amp;<br>Akad
+          </h3>
+          <p class="mt-3 text-[12.5px] leading-relaxed text-slate-400 font-light">
+            Pengurusan sertifikat, KPR, notaris, hingga serah terima kunci — kami tangani sampai
+            tuntas.
+          </p>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ TENTANG (gaya referensi — cermin) ═══════════════ -->
+<section id="about" class="w-full bg-white">
+  <div class="wrap px-5 sm:px-8 lg:px-10 py-16 lg:py-24">
+
+    <div class="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+
+      <!-- Kiri: kolase (urutan dibalik di desktop) -->
+      <div class="reveal-l relative grid grid-cols-[1fr_0.78fr] gap-4 items-end lg:order-1">
+        <div class="rounded-2xl overflow-hidden aspect-[3/2] bg-slate-100">
+          <img src="assets/img/kartu4.jpg" alt="Rumah keluarga dengan halaman luas" class="w-full h-full object-cover">
+        </div>
+        <div class="rounded-2xl overflow-hidden aspect-[4/5] bg-slate-100">
+          <img src="assets/img/kartu6.jpg" alt="Rumah dengan kolam dan taman" class="w-full h-full object-cover">
+        </div>
+
+        <div class="absolute -bottom-7 left-1/2 -translate-x-1/2 w-[min(420px,92%)]
+                    bg-white rounded-2xl shadow-[0_20px_50px_-24px_rgba(15,72,63,.55)]
+                    grid grid-cols-2 divide-x divide-slate-100">
+          <div class="px-5 py-5 text-center">
+            <p class="text-[26px] font-bold leading-none" data-count="30" data-suffix="%">0</p>
+            <p class="mt-1.5 text-[11px] leading-snug text-slate-400 font-light">Kenaikan Penjualan</p>
+          </div>
+          <div class="px-5 py-5 text-center">
+            <p class="text-[26px] font-bold leading-none" data-count="49" data-divide="10">0</p>
+            <p class="mt-1.5 text-[11px] leading-snug text-slate-400 font-light">Rating Kepuasan</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kanan: teks -->
+      <div class="max-w-[560px] lg:order-2">
+        <h2 class="reveal-r d1 mt-4 text-[28px] sm:text-[34px] lg:text-[38px] font-bold leading-[1.18]">
+          Mewujudkan <span class="hl">Rumah Impian</span><br>
+          Menjadi Kenyataan
+        </h2>
+
+        <p class="reveal-r d2 mt-5 text-[14px] leading-relaxed text-slate-500 font-light max-w-[460px]">
+          Sejak awal berdiri, misi kami sederhana: membuat proses jual-beli properti jadi mudah dan
+          menyenangkan. Kami menemani klien mulai dari menentukan budget, memilih lokasi, mengurus
+          dokumen, sampai kunci rumah diserahkan.
+        </p>
+
+        <a href="#contact" class="reveal-r d3 inline-block mt-7 px-8 py-3.5 rounded-full bg-forest text-white
+                                   text-[13.5px] font-semibold hover:bg-forest/90 transition
+                                   shadow-[0_12px_28px_-14px_rgba(15,72,63,.9)]">Kenali Kami</a>
+
+        <div class="reveal-r d4 mt-9 grid grid-cols-3 gap-5">
+          <div>
+            <p class="text-[22px] font-bold leading-none" data-count="100" data-suffix="+">0</p>
+            <p class="mt-1.5 text-[11.5px] text-slate-400 font-light leading-snug">Agen berlisensi</p>
+          </div>
+          <div>
+            <p class="text-[22px] font-bold leading-none" data-count="12" data-suffix=" thn">0</p>
+            <p class="mt-1.5 text-[11.5px] text-slate-400 font-light leading-snug">Pengalaman</p>
+          </div>
+          <div>
+            <p class="text-[22px] font-bold leading-none" data-count="25" data-suffix=" kota">0</p>
+            <p class="mt-1.5 text-[11.5px] text-slate-400 font-light leading-snug">Jangkauan</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ DAFTAR PROPERTI ═══════════════ -->
+<section id="property" class="w-full bg-mint/40">
+  <div class="wrap px-5 sm:px-8 lg:px-10 py-16 lg:py-24">
+
+    <div class="text-center max-w-[620px] mx-auto">
+      <span class="reveal inline-block px-4 py-1.5 rounded-full border border-slate-300 bg-white
+                   text-[11px] font-medium text-slate-600">Properti</span>
+      <h2 class="reveal d1 mt-5 text-[27px] sm:text-[32px] lg:text-[36px] font-bold leading-tight">
+        Temukan Ruang Hidup Yang Ideal
+      </h2>
+      <p class="reveal d2 mt-4 text-[13.5px] leading-relaxed text-slate-500 font-light">
+        Koleksi rumah pilihan di kawasan strategis Yogyakarta dan sekitarnya. Klik salah satu
+        untuk bertanya langsung kepada tim kami.
+      </p>
+    </div>
+
+    <div id="plist" class="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10"></div>
+
+    <div class="mt-14 text-center">
+      <button id="explore"
+              class="reveal inline-flex items-center gap-2.5 px-9 py-4 rounded-full bg-forest text-white
+                     text-[14px] font-semibold hover:bg-forest/90 transition
+                     shadow-[0_14px_32px_-16px_rgba(15,72,63,.95)]">
+        <span id="explore-txt">Lihat Semua Properti</span>
+        <svg id="explore-ico" viewBox="0 0 24 24" class="w-4 h-4 ic-2"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <p id="explore-note" class="mt-3 text-[12px] text-slate-400 font-light">
+        Menampilkan 6 dari 12 properti
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ FAQ ═══════════════ -->
+<section id="faq" class="w-full bg-white">
+  <div class="wrap px-5 sm:px-8 lg:px-10 py-16 lg:py-24">
+    <div class="grid lg:grid-cols-2 gap-10 lg:gap-16">
+
+      <div class="lg:pt-2">
+        <span class="reveal-l inline-block px-4 py-1.5 rounded-full border border-slate-300
+                     text-[11px] font-medium text-slate-600">FAQ</span>
+        <h2 class="reveal-l d1 mt-5 text-[27px] sm:text-[32px] lg:text-[36px] font-bold leading-tight">
+          Ada Pertanyaan? Lihat Bagian FAQ Kami
+        </h2>
+        <p class="reveal-l d2 mt-5 text-[13.5px] leading-relaxed text-slate-500 max-w-[430px] font-light">
+          Pertanyaan yang paling sering diajukan calon pembeli dan penjual properti.
+        </p>
+        <a id="faq-wa" href="#" target="_blank" rel="noopener"
+           class="reveal-l d3 inline-flex items-center gap-2 mt-7 px-7 py-3.5 rounded-full bg-wa text-white
+                  text-[13.5px] font-semibold hover:brightness-95 transition
+                  shadow-[0_12px_28px_-14px_rgba(37,211,102,.95)]">
+          <svg viewBox="0 0 24 24" class="w-4 h-4" fill="currentColor">
+            <path d="M12.04 2C6.6 2 2.2 6.4 2.2 11.84c0 1.74.46 3.44 1.32 4.94L2 22l5.36-1.4c1.44.78 3.06 1.2 4.68 1.2 5.44 0 9.84-4.4 9.84-9.84S17.48 2 12.04 2zm5.7 13.9c-.24.68-1.4 1.3-1.94 1.36-.54.06-1.02.24-3.42-.72-2.9-1.16-4.72-4.16-4.86-4.36-.14-.2-1.14-1.54-1.14-2.94 0-1.4.72-2.08.98-2.36.26-.28.56-.36.76-.36l.54.02c.18 0 .42-.06.64.5.24.6.8 2.02.86 2.16.06.14.1.3.02.48-.1.2-.36.52-.56.72-.16.16-.34.34-.14.68.2.34.9 1.48 1.92 2.4 1.32 1.18 2.42 1.54 2.76 1.72.34.18.54.16.74-.08.2-.24.86-1 1.1-1.34.24-.34.46-.28.78-.16.32.12 2.02.96 2.36 1.14.34.18.58.26.66.4.08.16.08.9-.16 1.58z"/>
+          </svg>
+          Tanya Langsung
+        </a>
+      </div>
+
+      <div id="faq-list" class="reveal-r flex flex-col gap-3"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ ULASAN PELANGGAN (3 baris) ═══════════════ -->
+<section id="reviews" class="w-full bg-mint/40">
+  <div class="wrap px-5 sm:px-8 lg:px-10 py-16 lg:py-24">
+
+    <div class="text-center max-w-[660px] mx-auto">
+      <span class="reveal inline-block px-4 py-1.5 rounded-full border border-slate-300 bg-white
+                   text-[11px] font-medium text-slate-600">Ulasan Pelanggan</span>
+      <h2 class="reveal d1 mt-5 text-[27px] sm:text-[32px] lg:text-[36px] font-bold leading-tight">
+        Kisah Klien Yang Sudah Kami Bantu
+      </h2>
+
+      <!-- ringkasan rating -->
+      <div class="reveal d2 mt-6 inline-flex flex-wrap items-center justify-center gap-x-6 gap-y-3
+                  bg-white rounded-2xl border border-slate-200 px-7 py-4">
+        <div class="text-left">
+          <div class="flex items-center gap-2">
+            <span class="text-[28px] font-bold leading-none">4.9</span>
+            <span class="flex gap-0.5 text-[#F5A623]" id="stars-summary"></span>
+          </div>
+          <p class="mt-1 text-[11px] text-slate-400 font-light">dari 1.284 ulasan</p>
+        </div>
+        <span class="w-px h-10 bg-slate-200 hidden sm:block"></span>
+        <div class="text-left">
+          <p class="text-[15px] font-bold leading-none">98%</p>
+          <p class="mt-1 text-[11px] text-slate-400 font-light">merekomendasikan kami</p>
+        </div>
+        <span class="w-px h-10 bg-slate-200 hidden sm:block"></span>
+        <div class="text-left">
+          <p class="text-[15px] font-bold leading-none">18K+</p>
+          <p class="mt-1 text-[11px] text-slate-400 font-light">klien terlayani</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="rlist" class="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+  </div>
+</section>
+
+<!-- ═══════════════ FOOTER / KONTAK ═══════════════ -->
+<footer id="contact" class="w-full bg-forest text-white">
+  <div class="wrap grid lg:grid-cols-2 gap-10 lg:gap-14 px-5 sm:px-8 lg:px-10 py-16 lg:py-24">
+
+    <div class="lg:pt-3">
+      <span class="reveal-l inline-block px-4 py-1.5 rounded-full border border-white/35
+                   text-[11px] font-medium text-white/90">Hubungi Kami</span>
+      <h2 class="reveal-l d1 mt-6 text-[30px] sm:text-[36px] lg:text-[40px] font-bold leading-[1.15]">
+        Let's Find Your Perfect Property
+      </h2>
+      <p class="reveal-l d2 mt-5 text-[13.5px] leading-relaxed text-white/70 max-w-[400px] font-light">
+        Punya pertanyaan atau siap melangkah? Baik Anda ingin membeli, menjual, atau sekadar
+        mencari tahu — kami siap membantu.
+      </p>
+
+      <!-- tombol WhatsApp utama -->
+      <a id="wa-main" href="#" target="_blank" rel="noopener"
+         class="reveal-l d3 inline-flex items-center gap-3 mt-8 px-8 py-4 rounded-full bg-wa text-white
+                text-[14px] font-semibold hover:brightness-95 transition
+                shadow-[0_14px_34px_-16px_rgba(37,211,102,1)]">
+        <svg viewBox="0 0 24 24" class="w-5 h-5" fill="currentColor">
+          <path d="M12.04 2C6.6 2 2.2 6.4 2.2 11.84c0 1.74.46 3.44 1.32 4.94L2 22l5.36-1.4c1.44.78 3.06 1.2 4.68 1.2 5.44 0 9.84-4.4 9.84-9.84S17.48 2 12.04 2zm5.7 13.9c-.24.68-1.4 1.3-1.94 1.36-.54.06-1.02.24-3.42-.72-2.9-1.16-4.72-4.16-4.86-4.36-.14-.2-1.14-1.54-1.14-2.94 0-1.4.72-2.08.98-2.36.26-.28.56-.36.76-.36l.54.02c.18 0 .42-.06.64.5.24.6.8 2.02.86 2.16.06.14.1.3.02.48-.1.2-.36.52-.56.72-.16.16-.34.34-.14.68.2.34.9 1.48 1.92 2.4 1.32 1.18 2.42 1.54 2.76 1.72.34.18.54.16.74-.08.2-.24.86-1 1.1-1.34.24-.34.46-.28.78-.16.32.12 2.02.96 2.36 1.14.34.18.58.26.66.4.08.16.08.9-.16 1.58z"/>
+        </svg>
+        Chat WhatsApp Sekarang
+      </a>
+
+      <div class="reveal-l d4 mt-9 flex flex-col gap-3 text-[13px] text-white/75">
+        <p class="flex items-center gap-3">
+          <svg viewBox="0 0 24 24" class="w-4 h-4 ic-2 shrink-0"><path d="M12 21.5s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11z"/><circle cx="12" cy="10.4" r="2.6"/></svg>
+          Jl. Kaliurang Km 5, Sleman, Yogyakarta
+        </p>
+        <p class="flex items-center gap-3">
+          <svg viewBox="0 0 24 24" class="w-4 h-4 ic-2 shrink-0"><path d="M3 6.5h18v11H3z"/><path d="m3.5 7 8.5 6 8.5-6"/></svg>
+          halo@rumahimpian.id
+        </p>
+        <p class="flex items-center gap-3">
+          <svg viewBox="0 0 24 24" class="w-4 h-4 ic-2 shrink-0"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>
+          Senin–Sabtu, 08.00–17.00 WIB
+        </p>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <div class="reveal-r">
+      <div class="grid sm:grid-cols-2 gap-x-5 gap-y-4">
+
+        <div>
+          <label class="block text-[11.5px] font-medium text-white/85 mb-2">Nama Anda</label>
+          <input type="text" placeholder="Nama lengkap"
+                 class="w-full px-4 py-3 rounded-xl bg-transparent border border-white/25
+                        text-[13px] text-white placeholder-white/45 focus:outline-none focus:border-brand transition">
+        </div>
+
+        <div>
+          <label class="block text-[11.5px] font-medium text-white/85 mb-2">Anda Ingin?</label>
+          <div class="relative">
+            <select class="sel w-full px-4 py-3 rounded-xl bg-transparent border border-white/25
+                           text-[13px] text-white focus:outline-none focus:border-brand transition">
+              <option class="text-ink">Membeli rumah</option>
+              <option class="text-ink">Menjual rumah</option>
+              <option class="text-ink">Menyewa rumah</option>
+            </select>
+            <svg viewBox="0 0 24 24" class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60 ic-2"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11.5px] font-medium text-white/85 mb-2">Lokasi Diminati</label>
+          <div class="relative">
+            <select class="sel w-full px-4 py-3 rounded-xl bg-transparent border border-white/25
+                           text-[13px] text-white focus:outline-none focus:border-brand transition">
+              <option class="text-ink">Yogyakarta</option>
+              <option class="text-ink">Sleman</option>
+              <option class="text-ink">Bantul</option>
+              <option class="text-ink">Magelang</option>
+            </select>
+            <svg viewBox="0 0 24 24" class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60 ic-2"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11.5px] font-medium text-white/85 mb-2">Anggaran</label>
+          <div class="relative">
+            <select class="sel w-full px-4 py-3 rounded-xl bg-transparent border border-white/25
+                           text-[13px] text-white focus:outline-none focus:border-brand transition">
+              <option class="text-ink">&lt; Rp 500 juta</option>
+              <option class="text-ink">Rp 500 jt – 1 M</option>
+              <option class="text-ink">Rp 1 M – 2 M</option>
+              <option class="text-ink">&gt; Rp 2 M</option>
+            </select>
+            <svg viewBox="0 0 24 24" class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60 ic-2"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11.5px] font-medium text-white/85 mb-2">Email</label>
+          <input type="email" placeholder="nama@email.com"
+                 class="w-full px-4 py-3 rounded-xl bg-transparent border border-white/25
+                        text-[13px] text-white placeholder-white/45 focus:outline-none focus:border-brand transition">
+        </div>
+
+        <div>
+          <label class="block text-[11.5px] font-medium text-white/85 mb-2">Nomor WhatsApp</label>
+          <input type="tel" placeholder="0812 3456 7890"
+                 class="w-full px-4 py-3 rounded-xl bg-transparent border border-white/25
+                        text-[13px] text-white placeholder-white/45 focus:outline-none focus:border-brand transition">
+        </div>
+      </div>
+
+      <div class="mt-7 text-center">
+        <button id="form-wa"
+                class="inline-flex items-center gap-2.5 px-9 py-4 rounded-full bg-brand text-ink
+                       text-[14px] font-semibold hover:brightness-95 transition
+                       shadow-[0_12px_28px_-12px_rgba(205,241,135,1)]">
+          <svg viewBox="0 0 24 24" class="w-4 h-4" fill="currentColor">
+            <path d="M12.04 2C6.6 2 2.2 6.4 2.2 11.84c0 1.74.46 3.44 1.32 4.94L2 22l5.36-1.4c1.44.78 3.06 1.2 4.68 1.2 5.44 0 9.84-4.4 9.84-9.84S17.48 2 12.04 2zm5.7 13.9c-.24.68-1.4 1.3-1.94 1.36-.54.06-1.02.24-3.42-.72-2.9-1.16-4.72-4.16-4.86-4.36-.14-.2-1.14-1.54-1.14-2.94 0-1.4.72-2.08.98-2.36.26-.28.56-.36.76-.36l.54.02c.18 0 .42-.06.64.5.24.6.8 2.02.86 2.16.06.14.1.3.02.48-.1.2-.36.52-.56.72-.16.16-.34.34-.14.68.2.34.9 1.48 1.92 2.4 1.32 1.18 2.42 1.54 2.76 1.72.34.18.54.16.74-.08.2-.24.86-1 1.1-1.34.24-.34.46-.28.78-.16.32.12 2.02.96 2.36 1.14.34.18.58.26.66.4.08.16.08.9-.16 1.58z"/>
+          </svg>
+          Kirim &amp; Lanjut ke WhatsApp
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="border-t border-white/12">
+    <div class="wrap px-5 sm:px-8 lg:px-10 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <p class="text-[12px] text-white/55 font-light">© <span id="yr"></span> Rumah Impian. Seluruh hak cipta dilindungi.</p>
+      <p class="text-[12px] text-white/55 font-light">Yogyakarta · Sleman · Bantul · Magelang</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══════════════ TOMBOL MENGAPUNG ═══════════════ -->
+<a id="wa-float" href="#" target="_blank" rel="noopener" aria-label="Chat WhatsApp"
+   class="fab fixed bottom-6 right-6 z-50 grid place-items-center w-14 h-14 rounded-full bg-wa text-white
+          shadow-[0_16px_36px_-14px_rgba(37,211,102,1)]">
+  <span class="ring absolute inset-0 rounded-full bg-wa"></span>
+  <svg viewBox="0 0 24 24" class="relative w-7 h-7" fill="currentColor">
+    <path d="M12.04 2C6.6 2 2.2 6.4 2.2 11.84c0 1.74.46 3.44 1.32 4.94L2 22l5.36-1.4c1.44.78 3.06 1.2 4.68 1.2 5.44 0 9.84-4.4 9.84-9.84S17.48 2 12.04 2zm5.7 13.9c-.24.68-1.4 1.3-1.94 1.36-.54.06-1.02.24-3.42-.72-2.9-1.16-4.72-4.16-4.86-4.36-.14-.2-1.14-1.54-1.14-2.94 0-1.4.72-2.08.98-2.36.26-.28.56-.36.76-.36l.54.02c.18 0 .42-.06.64.5.24.6.8 2.02.86 2.16.06.14.1.3.02.48-.1.2-.36.52-.56.72-.16.16-.34.34-.14.68.2.34.9 1.48 1.92 2.4 1.32 1.18 2.42 1.54 2.76 1.72.34.18.54.16.74-.08.2-.24.86-1 1.1-1.34.24-.34.46-.28.78-.16.32.12 2.02.96 2.36 1.14.34.18.58.26.66.4.08.16.08.9-.16 1.58z"/>
+  </svg>
+</a>
+
+<button id="toTop" aria-label="Kembali ke atas"
+        class="hide fixed bottom-6 left-6 z-50 grid place-items-center w-12 h-12 rounded-full bg-white text-ink
+               border border-slate-200 shadow-[0_12px_28px_-14px_rgba(26,43,60,.6)] hover:border-slate-300 transition">
+  <svg viewBox="0 0 24 24" class="w-5 h-5 ic"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
+</button>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   PENGATURAN — ganti nomor WhatsApp di sini
+   ══════════════════════════════════════════════════════════════ */
+const WA_NUMBER = "6281234567890";   // <-- GANTI dengan nomor WhatsApp Anda (format 62…)
+const waLink = (pesan) => `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(pesan)}`;
+
+document.documentElement.classList.add('js');
+document.getElementById('yr').textContent = new Date().getFullYear();
+
+/* ══════════════════════════════════════════════════════════════
+   DATA PROPERTI
+   ══════════════════════════════════════════════════════════════ */
+const PROPERTI = [
+  { img:'kartu1.jpg', harga:'Rp 1,75 M', nama:'Kondominium Pemandangan Kota',     kt:2, km:2, luas:'102 m²', lokasi:'Kota Yogyakarta', tag:'Dijual', judul:'Hunian vertikal dengan panorama kota' },
+  { img:'kartu2.jpg', harga:'Rp 1,87 M', nama:'Rumah Klasik Renovasi Modern',    kt:5, km:4, luas:'325 m²', lokasi:'Sleman',          tag:'Dijual', judul:'Bangunan lama, tata ruang baru' },
+  { img:'kartu3.jpg', harga:'Rp 2,10 M', nama:'Rumah Deret Kawasan Strategis',   kt:4, km:3, luas:'204 m²', lokasi:'Depok, Sleman',   tag:'Dijual', judul:'Dekat kampus dan pusat niaga' },
+  { img:'kartu4.jpg', harga:'Rp 1,75 M', nama:'Rumah Keluarga Halaman Luas',     kt:2, km:2, luas:'102 m²', lokasi:'Bantul',          tag:'Dijual', judul:'Cocok untuk keluarga muda' },
+  { img:'kartu5.jpg', harga:'Rp 1,87 M', nama:'Vila Kontemporer Pusat Kota',     kt:5, km:4, luas:'325 m²', lokasi:'Kota Yogyakarta', tag:'Dijual', judul:'Desain modern, lokasi premium' },
+  { img:'kartu6.jpg', harga:'Rp 2,10 M', nama:'Rumah Taman Berkolam Renang',     kt:4, km:3, luas:'204 m²', lokasi:'Sleman',          tag:'Dijual', judul:'Taman asri dengan kolam pribadi' },
+];
+
+const PROPERTI_EXTRA = [
+  { img:'extra-1.jpg', harga:'Rp 1,45 M', nama:'Rumah Minimalis Berpagar Kayu',   kt:3, km:2, luas:'120 m²', lokasi:'Sleman',          tag:'Dijual', judul:'Efisien untuk keluarga kecil' },
+  { img:'extra-2.jpg', harga:'Rp 2,35 M', nama:'Rumah Modern Bawah Pohon Rindang', kt:4, km:3, luas:'280 m²', lokasi:'Kaliurang',      tag:'Dijual', judul:'Sejuk, tenang, jauh dari bising' },
+  { img:'extra-3.jpg', harga:'Rp 2,80 M', nama:'Rumah Mewah Bergaya Tropis',      kt:5, km:5, luas:'360 m²', lokasi:'Kota Yogyakarta', tag:'Dijual', judul:'Material pilihan, tata ruang lapang' },
+  { img:'extra-4.jpg', harga:'Rp 1,20 M', nama:'Rumah Atap Limas Taman Hijau',   kt:3, km:2, luas:'96 m²',  lokasi:'Bantul',          tag:'Dijual', judul:'Pilihan pertama yang terjangkau' },
+  { img:'extra-5.jpg', harga:'Rp 1,95 M', nama:'Rumah Dua Lantai Berkarport',    kt:4, km:3, luas:'210 m²', lokasi:'Depok, Sleman',   tag:'Dijual', judul:'Kapasitas parkir memadai' },
+  { img:'extra-6.jpg', harga:'Rp 1,60 M', nama:'Rumah Tradisional Halaman Hijau', kt:3, km:2, luas:'150 m²', lokasi:'Magelang',        tag:'Dijual', judul:'Nuansa klasik yang terawat' },
+];
+
+/* ══════════════════════════════════════════════════════════════
+   DATA ULASAN — 9 kartu (3 baris)
+   ══════════════════════════════════════════════════════════════ */
+const ULASAN = [
+  { n:'Rani Kusuma',        k:'Yogyakarta',  p:'Rumah Keluarga Halaman Luas',        t:'Prosesnya jauh lebih mudah dari yang saya bayangkan. Timnya sabar menjawab semua pertanyaan saya soal KPR, bahkan sampai malam.' },
+  { n:'Bagas Prasetyo',     k:'Sleman',      p:'Rumah Klasik Renovasi Modern',       t:'Mereka mengantar saya survei ke tujuh rumah dalam dua minggu tanpa keluhan. Akhirnya dapat rumah yang pas dengan anggaran.' },
+  { n:'Dewi Anggraini',     k:'Bantul',      p:'Vila Kontemporer Pusat Kota',        t:'Saya menjual rumah lama dan membeli yang baru lewat Rumah Impian. Semua dokumen diurus rapi, tidak ada yang tertinggal.' },
+  { n:'Fajar Nugroho',      k:'Kota Yogyakarta', p:'Kondominium Pemandangan Kota',   t:'Harga yang ditawarkan jujur dan sesuai pasar. Tidak ada biaya tersembunyi seperti pengalaman saya sebelumnya.' },
+  { n:'Sinta Maharani',     k:'Depok, Sleman', p:'Rumah Deret Kawasan Strategis',   t:'Yang paling saya hargai: mereka jujur soal kondisi rumah, termasuk hal-hal kecil yang perlu diperbaiki.' },
+  { n:'Yoga Pratama',       k:'Magelang',    p:'Rumah Tradisional Halaman Hijau',    t:'Komunikasinya cepat lewat WhatsApp. Setiap pertanyaan dijawab dalam hitungan menit, tidak pernah dibiarkan.' },
+  { n:'Lestari Wulandari',  k:'Sleman',      p:'Rumah Taman Berkolam Renang',        t:'Anak-anak saya langsung jatuh cinta pada halaman rumahnya. Terima kasih sudah menemukan rumah yang cocok untuk kami.' },
+  { n:'Andi Setiawan',      k:'Kaliurang',   p:'Rumah Modern Bawah Pohon Rindang',   t:'Sebagai pembeli pertama, saya butuh banyak bimbingan. Timnya sabar menjelaskan dari nol sampai akad selesai.' },
+  { n:'Maya Puspita',       k:'Kota Yogyakarta', p:'Rumah Mewah Bergaya Tropis',     t:'Profesional dan ramah. Saya merekomendasikan Rumah Impian ke dua rekan kerja saya, dan keduanya puas.' },
+];
+
+/* ══════════════════════════════════════════════════════════════
+   DATA FAQ
+   ══════════════════════════════════════════════════════════════ */
+const FAQ = [
+  { q:'Berapa budget yang saya butuhkan untuk membeli rumah?',
+    a:'Umumnya cicilan rumah sebaiknya tidak melebihi 30% dari penghasilan bulanan Anda. Selain itu, siapkan uang muka 10–30% dan biaya tambahan seperti BPHTB, notaris, serta provisi bank sekitar 5% dari harga rumah.' },
+  { q:'Bagaimana proses membeli rumah di Rumah Impian?',
+    a:'Empat langkah saja: (1) konsultasi kebutuhan dan budget, (2) kami carikan dan dampingi saat survei lokasi, (3) negosiasi harga dan pengurusan dokumen, (4) akad dan serah terima kunci.' },
+  { q:'Apa saja yang perlu saya periksa saat melihat rumah?',
+    a:'Periksa sertifikat dan keaslian dokumen, kondisi struktur (atap, dinding, lantai), instalasi listrik dan air, akses jalan, serta lingkungan sekitar seperti banjir dan keamanan.' },
+  { q:'Berapa harga penawaran yang wajar saat membeli rumah?',
+    a:'Bandingkan dengan 3–5 rumah sejenis di lokasi yang sama. Penawaran 5–10% di bawah harga pasaran umumnya masih wajar, dan kami bantu negosiasikan ke penjual.' },
+  { q:'Apakah Rumah Impian membantu pengurusan KPR?',
+    a:'Ya. Kami bekerja sama dengan beberapa bank dan membantu mulai dari simulasi cicilan, pengumpulan berkas, sampai proses persetujuan kredit.' },
+];
+
+/* ══════════════════════════════════════════════════════════════
+   1. PEMBUKA — hilang setelah halaman siap
+   ══════════════════════════════════════════════════════════════ */
+window.addEventListener('load', () => {
+  setTimeout(() => document.getElementById('intro').classList.add('done'), 750);
+});
+// pengaman: apa pun yang terjadi, pembuka hilang setelah 2,5 detik
+setTimeout(() => document.getElementById('intro').classList.add('done'), 2500);
+
+/* ══════════════════════════════════════════════════════════════
+   2. HERO SLIDESHOW — 5 foto, otomatis 5 detik
+   ══════════════════════════════════════════════════════════════ */
+(() => {
+  const slides = [...document.querySelectorAll('#slides .slide')];
+  const dotBox = document.getElementById('dots');
+  let i = 0, timer = null;
+
+  slides.forEach((_, n) => {
+    const b = document.createElement('button');
+    b.className = 'dot h-2 w-2 rounded-full bg-white/60';
+    b.setAttribute('aria-label', 'Foto ' + (n + 1));
+    b.addEventListener('click', () => go(n));
+    dotBox.appendChild(b);
+  });
+  const dots = [...dotBox.children];
+
+  function paint() {
+    slides.forEach((s, n) => s.classList.toggle('on', n === i));
+    dots.forEach((d, n) => d.classList.toggle('on', n === i));
+  }
+  function go(n) { i = (n + slides.length) % slides.length; paint(); restart(); }
+  function next() { go(i + 1); }
+  function prev() { go(i - 1); }
+  function restart() { clearInterval(timer); timer = setInterval(next, 5000); }
+
+  document.getElementById('next').addEventListener('click', next);
+  document.getElementById('prev').addEventListener('click', prev);
+
+  // berhenti saat kursor di atas foto
+  const box = document.getElementById('slides');
+  box.addEventListener('mouseenter', () => clearInterval(timer));
+  box.addEventListener('mouseleave', restart);
+
+  // dukungan geser (swipe) di layar sentuh
+  let x0 = null;
+  box.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
+  box.addEventListener('touchend', e => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 45) (dx < 0 ? next() : prev());
+    x0 = null;
+  });
+
+  paint(); restart();
+})();
+
+/* ══════════════════════════════════════════════════════════════
+   3. MUNCUL SAAT SCROLL
+   ══════════════════════════════════════════════════════════════ */
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(en => {
+    if (en.isIntersecting) { en.target.classList.add('in'); observer.unobserve(en.target); }
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+
+function watch(root = document) {
+  root.querySelectorAll('.reveal, .reveal-l, .reveal-r, .reveal-s').forEach(el => {
+    if (!el.classList.contains('in')) observer.observe(el);
+  });
+}
+
+/* ══════════════════════════════════════════════════════════════
+   4. ANGKA BERJALAN (counter)
+   ══════════════════════════════════════════════════════════════ */
+const counterObs = new IntersectionObserver((entries) => {
+  entries.forEach(en => {
+    if (!en.isIntersecting) return;
+    const el = en.target;
+    counterObs.unobserve(el);
+
+    const target = parseFloat(el.dataset.count);
+    const suffix = el.dataset.suffix || '';
+    const divide = parseFloat(el.dataset.divide || '1');
+    const dur = 1500, t0 = performance.now();
+
+    function tick(now) {
+      const p = Math.min((now - t0) / dur, 1);
+      const eased = 1 - Math.pow(1 - p, 3);          // melambat di akhir
+      const val = target * eased / divide;
+      el.textContent = (divide > 1 ? val.toFixed(1) : Math.round(val)) + suffix;
+      if (p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  });
+}, { threshold: 0.5 });
+
+function watchCounters(root = document) {
+  root.querySelectorAll('[data-count]').forEach(el => counterObs.observe(el));
+}
+
+/* ══════════════════════════════════════════════════════════════
+   5. KARTU PROPERTI + TOMBOL WHATSAPP PER KARTU
+   ══════════════════════════════════════════════════════════════ */
+function ikonJenis(jenis) {
+  const p = {
+    bed:  '<path d="M3 18v-4.5h18V18M3 18h18M5.5 13.5V9a1.5 1.5 0 0 1 1.5-1.5h10A1.5 1.5 0 0 1 18.5 9v4.5M7 18v2M17 18v2"/>',
+    bath: '<path d="M4 12h16v3a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3z"/><path d="M7 12V6.5a2 2 0 0 1 2-2h1.5M14 12V6.5a2 2 0 0 0-2-2h-1"/><path d="M7 18v1.6M17 18v1.6"/>',
+    area: '<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 9.5h16M9.5 4v16"/>',
+  };
+  return `<svg viewBox="0 0 24 24" class="w-4 h-4 ic-2">${p[jenis]}</svg>`;
+}
+
+function kartuHTML(d, anim) {
+  const pesan = `Halo Rumah Impian, saya tertarik dengan properti "${d.nama}" (${d.harga}) di ${d.lokasi}. Boleh minta informasi lebih lanjut?`;
+  return `
+    <article class="pcard group rounded-2xl overflow-hidden bg-white border border-slate-200/70
+                    ${anim ? 'card-new' : ''}" style="${anim ? 'animation-delay:' + anim + 's' : ''}">
+      <div class="relative overflow-hidden aspect-[4/3] bg-slate-100">
+        <img src="assets/img/${d.img}" alt="${d.nama}" class="w-full h-full object-cover">
+        <span class="absolute top-3 left-3 px-3 py-1 rounded-md bg-white/92 backdrop-blur
+                     text-[10px] font-semibold text-forest">${d.tag}</span>
+        <span class="absolute top-3 right-3 px-3 py-1 rounded-md bg-forest/85 backdrop-blur text-white
+                     text-[10px] font-medium flex items-center gap-1.5">
+          <svg viewBox="0 0 24 24" class="w-3 h-3 ic-2"><path d="M12 21.5s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11z"/><circle cx="12" cy="10.4" r="2.6"/></svg>
+          ${d.lokasi}
+        </span>
+      </div>
+
+      <div class="p-5">
+        <p class="text-[17px] font-bold text-forest">${d.harga}</p>
+        <h3 class="mt-1 text-[15px] font-semibold leading-snug">${d.nama}</h3>
+        <p class="mt-1 text-[11.5px] text-slate-400 font-light min-h-[34px]">${d.judul}</p>
+
+        <div class="mt-3 flex items-center gap-4 text-[12px] text-slate-400 font-light">
+          <span class="flex items-center gap-1.5">${ikonJenis('bed')}${d.kt} KT</span>
+          <span class="flex items-center gap-1.5">${ikonJenis('bath')}${d.km} KM</span>
+          <span class="flex items-center gap-1.5">${ikonJenis('area')}${d.luas}</span>
+        </div>
+
+        <a href="${waLink(pesan)}" target="_blank" rel="noopener"
+           class="mt-5 flex items-center justify-center gap-2 w-full py-3 rounded-xl
+                  bg-wa/10 text-[#128C4A] text-[13px] font-semibold
+                  hover:bg-wa hover:text-white transition-colors">
+          <svg viewBox="0 0 24 24" class="w-4 h-4" fill="currentColor">
+            <path d="M12.04 2C6.6 2 2.2 6.4 2.2 11.84c0 1.74.46 3.44 1.32 4.94L2 22l5.36-1.4c1.44.78 3.06 1.2 4.68 1.2 5.44 0 9.84-4.4 9.84-9.84S17.48 2 12.04 2zm5.7 13.9c-.24.68-1.4 1.3-1.94 1.36-.54.06-1.02.24-3.42-.72-2.9-1.16-4.72-4.16-4.86-4.36-.14-.2-1.14-1.54-1.14-2.94 0-1.4.72-2.08.98-2.36.26-.28.56-.36.76-.36l.54.02c.18 0 .42-.06.64.5.24.6.8 2.02.86 2.16.06.14.1.3.02.48-.1.2-.36.52-.56.72-.16.16-.34.34-.14.68.2.34.9 1.48 1.92 2.4 1.32 1.18 2.42 1.54 2.76 1.72.34.18.54.16.74-.08.2-.24.86-1 1.1-1.34.24-.34.46-.28.78-.16.32.12 2.02.96 2.36 1.14.34.18.58.26.66.4.08.16.08.9-.16 1.58z"/>
+          </svg>
+          Tanya via WhatsApp
+        </a>
+      </div>
+    </article>`;
+}
+
+const plist = document.getElementById('plist');
+plist.innerHTML = PROPERTI.map((d, n) => kartuHTML(d, n * 0.06)).join('');
+// kartu awal: muncul saat scroll
+plist.querySelectorAll('.card-new').forEach(el => {
+  el.classList.remove('card-new'); el.classList.add('reveal-s');
+});
+
+let sudahExplore = false;
+document.getElementById('explore').addEventListener('click', () => {
+  const btn = document.getElementById('explore');
+  const txt = document.getElementById('explore-txt');
+  const ico = document.getElementById('explore-ico');
+  const note = document.getElementById('explore-note');
+
+  if (sudahExplore) {
+    document.getElementById('property').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return;
+  }
+
+  // keadaan "memuat" singkat agar terasa responsif
+  btn.disabled = true;
+  txt.textContent = 'Memuat properti...';
+  ico.style.transition = 'transform .3s';
+  ico.style.transform = 'rotate(180deg)';
+
+  setTimeout(() => {
+    PROPERTI_EXTRA.forEach((d, n) => {
+      plist.insertAdjacentHTML('beforeend', kartuHTML(d, n * 0.09));
+    });
+    sudahExplore = true;
+    btn.disabled = false;
+    txt.textContent = 'Semua 12 Properti';
+    ico.style.transform = 'rotate(0deg)';
+    note.textContent = 'Seluruh 12 properti telah ditampilkan';
+    watch(plist);   // agar kartu baru ikut muncul halus
+  }, 420);
+});
+
+/* ══════════════════════════════════════════════════════════════
+   6. ULASAN — 9 kartu
+   ══════════════════════════════════════════════════════════════ */
+const WARNA = ['#0F483F','#7CB342','#1A2B3C','#B58F72','#839B80','#7A94AE','#967FA8','#A88C6E','#4E7C42'];
+const bintang = (n = 5) => Array.from({ length: n },
+  () => '<svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="currentColor"><path d="m12 3.6 2.6 5.4 5.9.8-4.3 4.1 1.1 5.9L12 17l-5.3 2.8 1.1-5.9L3.5 9.8l5.9-.8z"/></svg>'
+).join('');
+
+document.getElementById('rlist').innerHTML = ULASAN.map((u, n) => `
+  <article class="reveal-s d${(n % 3) + 1} flex flex-col h-full rounded-2xl border border-slate-200 bg-white p-6">
+    <div class="flex items-start justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <span class="grid place-items-center w-11 h-11 rounded-full text-white text-[15px] font-bold shrink-0"
+              style="background:${WARNA[n % WARNA.length]}">${u.n[0]}</span>
+        <div class="min-w-0">
+          <p class="text-[14px] font-semibold leading-tight">${u.n}</p>
+          <p class="text-[11.5px] text-slate-400 font-light mt-0.5">${u.k}</p>
+        </div>
+      </div>
+      <span class="grid place-items-center w-6 h-6 rounded-full bg-wa/15 text-[#128C4A] shrink-0"
+            title="Klien terverifikasi">
+        <svg viewBox="0 0 24 24" class="w-3.5 h-3.5 ic"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
+      </span>
+    </div>
+
+    <div class="mt-4 flex items-center gap-1 text-[#F5A623]">${bintang(5)}</div>
+
+    <p class="mt-3 text-[12.5px] leading-relaxed text-slate-500 font-light flex-1">"${u.t}"</p>
+
+    <div class="mt-4 pt-4 border-t border-slate-100 flex items-center gap-2 text-[11.5px] text-slate-400 font-light">
+      <svg viewBox="0 0 24 24" class="w-3.5 h-3.5 ic-2 shrink-0"><path d="M3 10.4 12 3.5l9 6.9V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/></svg>
+      ${u.p}
+    </div>
+  </article>
+`).join('');
+
+// bintang ringkasan di atas
+document.getElementById('stars-summary').innerHTML = bintang(5);
+
+/* ══════════════════════════════════════════════════════════════
+   7. FAQ — akordeon
+   ══════════════════════════════════════════════════════════════ */
+document.getElementById('faq-list').innerHTML = FAQ.map((f, n) => `
+  <div class="faq-item ${n === 0 ? 'open' : ''} rounded-2xl border border-slate-200 bg-white overflow-hidden">
+    <button class="faq-q w-full flex items-center justify-between gap-5 text-left px-5 py-5">
+      <span class="text-[14px] font-semibold leading-snug">${f.q}</span>
+      <span class="pm grid place-items-center w-7 h-7 rounded-full bg-mint text-forest shrink-0">
+        <svg viewBox="0 0 24 24" class="w-4 h-4 ic"><path d="M12 5v14M5 12h14"/></svg>
+      </span>
+    </button>
+    <div class="faq-a px-5">
+      <p class="pb-5 text-[12.5px] leading-relaxed text-slate-500 font-light">${f.a}</p>
+    </div>
+  </div>
+`).join('');
+
+document.querySelectorAll('.faq-q').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const item = btn.parentElement;
+    const terbuka = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(x => x.classList.remove('open'));
+    if (!terbuka) item.classList.add('open');
+  });
+});
+
+/* ══════════════════════════════════════════════════════════════
+   8. NAVBAR — bayangan saat scroll + menu mobile
+   ══════════════════════════════════════════════════════════════ */
+const nav = document.getElementById('nav');
+const toTop = document.getElementById('toTop');
+function onScroll() {
+  const y = window.scrollY;
+  nav.classList.toggle('stuck', y > 12);
+  toTop.classList.toggle('hide', y < 500);
+}
+window.addEventListener('scroll', onScroll, { passive: true });
+onScroll();
+
+toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+const burger = document.getElementById('burger');
+const mmenu = document.getElementById('mmenu');
+burger.addEventListener('click', () => {
+  const open = mmenu.style.maxHeight && mmenu.style.maxHeight !== '0px';
+  mmenu.style.maxHeight = open ? '0px' : mmenu.scrollHeight + 'px';
+  burger.setAttribute('aria-expanded', String(!open));
+});
+mmenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+  mmenu.style.maxHeight = '0px';
+  burger.setAttribute('aria-expanded', 'false');
+}));
+
+/* ══════════════════════════════════════════════════════════════
+   9. TOMBOL WHATSAPP
+   ══════════════════════════════════════════════════════════════ */
+const pesanUmum = 'Halo Rumah Impian, saya ingin bertanya tentang properti yang tersedia.';
+document.getElementById('wa-float').href = waLink(pesanUmum);
+document.getElementById('wa-main').href  = waLink(pesanUmum);
+document.getElementById('nav-wa').href   = waLink(pesanUmum);
+document.getElementById('mmenu-wa').href = waLink(pesanUmum);
+document.getElementById('faq-wa').href   = waLink('Halo Rumah Impian, saya punya pertanyaan seputar membeli rumah.');
+
+// form ke WhatsApp
+document.getElementById('form-wa').addEventListener('click', () => {
+  const f = document.querySelectorAll('#contact input, #contact select');
+  const nama = f[0].value.trim() || '(belum diisi)';
+  const ingin = f[1].value;
+  const lokasi = f[2].value;
+  const budget = f[3].value;
+  const email = f[4].value.trim() || '(belum diisi)';
+  const telp = f[5].value.trim() || '(belum diisi)';
+
+  const isi =
+    `Halo Rumah Impian, saya ingin berkonsultasi.%0A%0A` +
+    `Nama: ${nama}%0A` +
+    `Kebutuhan: ${ingin}%0A` +
+    `Lokasi: ${lokasi}%0A` +
+    `Anggaran: ${budget}%0A` +
+    `Email: ${email}%0A` +
+    `WhatsApp: ${telp}`;
+  window.open(`https://wa.me/${WA_NUMBER}?text=${isi}`, '_blank', 'noopener');
+});
+
+/* ══════════════════════════════════════════════════════════════
+   10. JALANKAN PEMANTAU
+   ══════════════════════════════════════════════════════════════ */
+watch();
+watchCounters();
+</script>
+
+</body>
+</html>
